@@ -78,6 +78,16 @@ jobs:
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
           echo "Latest run_id: $RUN_ID"
 
+      - name: Verify model directory exists for RUN_ID
+        run: |
+          source ~/.bashrc
+          conda activate heart-attack-predictor
+          echo "Verifying the model directory for RUN_ID: $RUN_ID"
+          if [ ! -d "MLProject/mlruns/0/$RUN_ID/artifacts/model" ]; then
+            echo "Model not found for RUN_ID: $RUN_ID. Exiting."
+            exit 1
+          fi
+          
       - name: Commit and Push
         run: |
           git config user.name "github-actions[bot]"
@@ -89,24 +99,11 @@ jobs:
       # ===============================
       # Build Docker Image from MLflow Model
       # ===============================
-      - name: Build Docker Image
-        shell: bash -l {0}
+      - name: Build Docker Image from MLflow model
         run: |
-          # Aktifkan environment conda
-          source ~/miniconda3/etc/profile.d/conda.sh
-          conda activate Maintenance-Prediction
+          conda activate Maintenance_Prediction
+          mlflow models build-docker --model-uri "file://$GITHUB_WORKSPACE/MLProjects/mlruns/0/$RUN_ID/artifacts/model" --name cc
       
-          # Ambil run_id terakhir MLflow
-          RUN_ID=$(ls -1 $GITHUB_WORKSPACE/MLProjects/mlruns/0 | sort | tail -n 1)
-          echo "Using MLflow run_id: $RUN_ID"
-      
-          # Path lengkap ke model artifact
-          MODEL_URI="file://$GITHUB_WORKSPACE/MLProjects/mlruns/0/$RUN_ID/artifacts/model"
-          echo "Model URI: $MODEL_URI"
-      
-          # Build Docker image
-          mlflow models build-docker --model-uri "$MODEL_URI" --name cc
-    
       # ===============================
       # Login Docker Hub
       # ===============================
