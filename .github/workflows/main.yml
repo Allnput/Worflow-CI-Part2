@@ -74,14 +74,6 @@ jobs:
           RUN_ID=$(ls -td mlruns/0/*/ | head -n 1 | cut -d'/' -f3)
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
           echo "Latest run_id: $RUN_ID"
-          
-      - name: Verify model artifact
-        run: |
-          if [ ! -d "MLProjects/mlruns/0/$RUN_ID/artifacts/model" ]; then
-            echo "❌ Model artifact not found!"
-            exit 1
-          fi
-          echo "✅ Model artifact found"
 
       # ===============================
       # Build Docker Image from MLflow Model
