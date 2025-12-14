@@ -1,0 +1,119 @@
+name: CI/CD MLflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  CSV_URL: "MLProject/Predictive_Maintenance_Preproces.csv"
+  TARGET_VAR: "Maintenance_Prediction"
+
+jobs:
+  train-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Check Env
+        run: |
+          echo "CSV_URL=$CSV_URL"
+          echo "TARGET_VAR=$TARGET_VAR"
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Kita butuh library ini di environment runner agar bisa setup experiment
+          pip install mlflow pandas scikit-learn numpy
+          
+      - name: Set up Conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          environment-file: MLProject/conda.yaml
+          activate-environment: Maintenance-Prediction
+          auto-activate-base: false
+
+      - name: Initialize Conda
+        run: |
+          echo "Initializing Conda for bash"
+          conda init bash
+          source ~/.bashrc  # Apply the changes made by 'conda init'
+          
+      - name: Install MLflow and dependencies
+        run: |
+            source ~/.bashrc
+            conda activate Maintenance-Prediction
+            pip install mlflow  # Install mlflow if it wasn't installed in the environment
+            pip install -r MLProject/requirements.txt  # Optional, if there is a requirements.txt
+
+      - name: Clean old mlruns
+        run: |
+          rm -rf MLProject/mlruns
+
+      - name: Set MLflow tracking URI
+        run: |
+            echo "MLFLOW_TRACKING_URI=file://$GITHUB_WORKSPACE/MLProject/mlruns" >> $GITHUB_ENV
+
+      - name: Run MLflow Project
+        run: |
+            cd MLProject
+            mlflow run . -P data_path=Predictive_Maintenance_Preproces.csv --env-manager=local
+
+       # Get latest run_id
+      - name: Get latest MLflow run_id
+        run: |
+          RUN_ID=$(ls -td mlruns/0/*/ | head -n 1 | cut -d'/' -f3)
+          echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
+          echo "Latest run_id: $RUN_ID"
+          
+      - name: Verify model artifact
+        run: |
+          if [ ! -d "MLProject/mlruns/0/$RUN_ID/artifacts/model" ]; then
+            echo "❌ Model artifact not found!"
+            exit 1
+          fi
+          echo "✅ Model artifact found"
+
+      # ===============================
+      # Build Docker Image from MLflow Model
+      # ===============================
+      - name: Build Docker Image
+        shell: bash -l {0}
+        run: |
+          mlflow models build-docker \
+            --model-uri "file://$GITHUB_WORKSPACE/MLProject/mlruns/0/$RUN_ID/artifacts/model" \
+            --name maintenance-model
+
+      # ===============================
+      # Login Docker Hub
+      # ===============================
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      # ===============================
+      # Tag Docker Image
+      # ===============================
+      - name: Tag Docker Image
+        run: |
+          docker tag maintenance-model \
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}:latest
+
+      # ===============================
+      # Push Docker Image
+      # ===============================
+      - name: Push Docker Image
+        run: |
+          docker push \
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}:latest
