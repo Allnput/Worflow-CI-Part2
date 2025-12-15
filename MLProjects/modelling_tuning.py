@@ -7,7 +7,11 @@ import mlflow
 import mlflow.sklearn
 
 # Gunakan path absolute untuk MLflow tracking
-mlruns_path = os.path.join(os.environ.get("GITHUB_WORKSPACE", "."), "MLProjects", "mlruns")
+mlruns_path = os.path.join(
+    os.environ.get("GITHUB_WORKSPACE", os.getcwd()),
+    "MLProjects",
+    "mlruns"
+)
 mlflow.set_tracking_uri(f"file://{mlruns_path}")
 mlflow.set_experiment("Maintenance-Prediction-CI")
 
@@ -78,8 +82,10 @@ def main(data_path):
         mlflow.log_metric("true_positive", tp)
 
         mlflow.sklearn.log_model(
-            best_model, "model",
-            input_example=X_test.iloc[:5]
+            sk_model=best_model,
+            artifact_path="model",
+            input_example=X_test.iloc[:5],
+            registered_model_name=None
         )
         
     print("Best Parameters:", best_params)
