@@ -44,10 +44,10 @@ def main():
 
     mlflow.log_params(best_params)
     mlflow.log_metric("best_f1_score", best_f1)
-
+    
     mlflow.sklearn.log_model(
         sk_model=best_model,
-        artifact_path="model"
+        name="model"
     )
 
 if __name__ == "__main__":
