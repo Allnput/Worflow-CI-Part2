@@ -1,0 +1,14 @@
+artifact_uri: file:///home/runner/work/Worflow-CI-Part2/Worflow-CI-Part2/MLProjects/mlruns/0/288766d7a0704a299875dc342a142ffe/artifacts
+end_time: 1765813189733
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 288766d7a0704a299875dc342a142ffe
+run_name: smiling-mouse-904
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1765813185850
+status: 3
+tags: []
+user_id: runner
