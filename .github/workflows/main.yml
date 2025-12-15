@@ -71,6 +71,11 @@ jobs:
             cd MLProjects
             mlflow run . -P data_path=Predictive_Maintenance_Preproces.csv --env-manager=local
 
+      - name: List MLruns folder
+        run: |
+            echo "Listing MLProjects/mlruns/0/$RUN_ID/artifacts/"
+            ls -R MLProjects/mlruns/0/$RUN_ID/artifacts/
+    
       - name: Get latest MLflow run_id
         run: |
           RUN_ID=$(ls -td $GITHUB_WORKSPACE/MLProjects/mlruns/0/*/ 2>/dev/null | head -n 1 | awk -F/ '{print $(NF-1)}')
