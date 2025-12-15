@@ -11,7 +11,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 import mlflow
 import mlflow.sklearn
 
-if _name_ == "_main_":
+if __name__ == "_main_":
     with mlflow.start_run():
         df = pd.read_csv("Predictive_Maintenance_Preproces.csv")
 
