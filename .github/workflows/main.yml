@@ -71,10 +71,13 @@ jobs:
             cd MLProjects
             mlflow run . -P data_path=Predictive_Maintenance_Preproces.csv --env-manager=local
 
-       # Get latest run_id
       - name: Get latest MLflow run_id
         run: |
-          RUN_ID=$(ls -td mlruns/0/*/ | head -n 1 | cut -d'/' -f3)
+          RUN_ID=$(ls -td $GITHUB_WORKSPACE/MLProjects/mlruns/0/*/ 2>/dev/null | head -n 1 | awk -F/ '{print $(NF-1)}')
+          if [ -z "$RUN_ID" ]; then
+            echo "No MLflow run found! Exiting."
+            exit 1
+          fi
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
           echo "Latest run_id: $RUN_ID"
 
