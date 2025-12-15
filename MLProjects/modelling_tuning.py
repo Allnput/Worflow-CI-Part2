@@ -11,9 +11,6 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 import mlflow
 import mlflow.sklearn
 
-mlflow.set_tracking_uri("file:MLProjects/mlruns")
-mlflow.set_experiment("maintenance-prediction")
-
 if __name__ == "__main__":
     with mlflow.start_run():
         df = pd.read_csv("Predictive_Maintenance_Preproces.csv")
