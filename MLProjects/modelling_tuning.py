@@ -68,16 +68,16 @@ if __name__ == "_main_":
                 best_y_pred = y_pred
                 best_params = params
 
-        mlflow.log_params(best_params)
-        mlflow.log_metric("best_f1_score", best_f1)
-
-        cm = confusion_matrix(y_test, best_y_pred)
-        print("\nConfusion Matrix:")
-        print(cm)
-        
-        mlflow.sklearn.log_model(
-            sk_model=best_model,
-            name="model"
-        )
+            mlflow.log_params(best_params)
+            mlflow.log_metric("best_f1_score", best_f1)
+    
+            cm = confusion_matrix(y_test, best_y_pred)
+            print("\nConfusion Matrix:")
+            print(cm)
+            
+            mlflow.sklearn.log_model(
+                sk_model=best_model,
+                name="model"
+            )
 
     print("\n=== MLflow logging completed ===")
