@@ -4,21 +4,17 @@ import numpy as np
 import pandas as pd
 import os
 import mlflow
-
 import mlflow.sklearn
+
+# Gunakan path absolute untuk MLflow tracking
 mlruns_path = os.path.join(os.environ.get("GITHUB_WORKSPACE", "."), "MLProjects", "mlruns")
-mlflow.set_tracking_uri(f"file://{os.path.abspath('mlruns')}")
+mlflow.set_tracking_uri(f"file://{mlruns_path}")
 mlflow.set_experiment("Maintenance-Prediction-CI")
 
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import (
-    accuracy_score,
-    recall_score,
-    precision_score,
-    f1_score,
-    confusion_matrix
-)
+from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score, confusion_matrix
+
 def main(data_path):
     df = pd.read_csv(data_path)
 
@@ -47,7 +43,6 @@ def main(data_path):
             class_weight="balanced",
             **params
         )
-
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
 
@@ -59,16 +54,19 @@ def main(data_path):
             best_params = params
             best_y_pred = y_pred
 
+    # Metrics
     acc = accuracy_score(y_test, best_y_pred)
     recall = recall_score(y_test, best_y_pred)
     precision = precision_score(y_test, best_y_pred)
     f1 = f1_score(y_test, best_y_pred)
+    tn, fp, fn, tp = confusion_matrix(y_test, best_y_pred).ravel()
 
-    conf_matrix = confusion_matrix(y_test, best_y_pred)
-    tn, fp, fn, tp = conf_matrix.ravel()
-
+    # Log ke MLflow
     os.environ.pop("MLFLOW_RUN_ID", None)
-    with mlflow.start_run():
+    with mlflow.start_run() as run:
+        run_id = run.info.run_id
+        print(f"MLflow run_id: {run_id}")
+
         mlflow.log_params(best_params)
         mlflow.log_metric("accuracy", acc)
         mlflow.log_metric("recall", recall)
@@ -79,19 +77,25 @@ def main(data_path):
         mlflow.log_metric("false_negative", fn)
         mlflow.log_metric("true_positive", tp)
 
+        # Pastikan folder artifacts/model dibuat
         mlflow.sklearn.log_model(
-            best_model, name="model", input_example=X_test.iloc[:5])
-        
+            best_model,
+            artifact_path="model",  # <-- ini penting, buat folder model di artifacts
+            input_example=X_test.iloc[:5]
+        )
+
+    # Simpan juga secara lokal di artifacts/
     os.makedirs("artifacts", exist_ok=True)
     model_path = "artifacts/best_logreg_model.pkl"
     joblib.dump(best_model, model_path)
 
+    # Print summary
     print("Best Parameters:", best_params)
     print(f"Accuracy  : {acc}")
     print(f"Recall    : {recall}")
     print(f"Precision : {precision}")
     print(f"F1-score  : {f1}")
-    print("Confusion Matrix:\n", conf_matrix)
+    print("Confusion Matrix:\n", confusion_matrix(y_test, best_y_pred))
 
 
 if __name__ == "__main__":
@@ -103,5 +107,4 @@ if __name__ == "__main__":
         help="Path ke file CSV dataset"
     )
     args = parser.parse_args()
-
     main(args.data_path)
