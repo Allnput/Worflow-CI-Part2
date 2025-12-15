@@ -110,15 +110,7 @@ jobs:
         run: |
           source ~/.bashrc
           conda activate Maintenance-Prediction
-      
-          cd MLProjects
-          MODEL_PATH=$(ls -d mlruns/0/models/* | tail -n 1)
-      
-          echo "Using model at: $MODEL_PATH"
-      
-          mlflow models build-docker \
-            -m "$MODEL_PATH" \
-            -n maintenance-prediction
+          mlflow models build-docker \--model-uri "file://$GITHUB_WORKSPACE/MLProjects/mlruns/0/models/m-5a4b2e67a1104eeda1ca26a1b9d58b79" \--name maintenance-prediction
       
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
