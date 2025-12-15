@@ -6,7 +6,7 @@ import os
 import mlflow
 
 import mlflow.sklearn
-
+mlruns_path = os.path.join(os.environ.get("GITHUB_WORKSPACE", "."), "MLProjects", "mlruns")
 mlflow.set_tracking_uri(f"file://{os.path.abspath('mlruns')}")
 mlflow.set_experiment("Maintenance-Prediction-CI")
 
