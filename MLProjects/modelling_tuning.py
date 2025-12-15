@@ -11,6 +11,9 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 import mlflow
 import mlflow.sklearn
 
+mlflow.set_tracking_uri("file:MLProjects/mlruns")
+mlflow.set_experiment("maintenance-prediction")
+
 if __name__ == "__main__":
     with mlflow.start_run():
         df = pd.read_csv("Predictive_Maintenance_Preproces.csv")
@@ -75,10 +78,10 @@ if __name__ == "__main__":
         print("\nConfusion Matrix:")
         print(cm)
         
-        os.makedirs("artifacts", exist_ok=True)
-        model_path = "artifacts/best_logreg_model.pkl"
-        joblib.dump(best_model, model_path)
-
-        mlflow.log_artifact(model_path, artifact_path="model")
+        mlflow.sklearn.log_model(
+            sk_model=best_model,
+            artifact_path="model",
+            registered_model_name=None
+        )
 
     print("\n=== MLflow logging completed ===")
