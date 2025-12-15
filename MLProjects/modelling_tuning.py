@@ -76,7 +76,7 @@ if __name__ == "__main__":
         print(cm)
 
         os.makedirs("artifacts", exist_ok=True)
-        model_path = "artifacts/best_logreg_model.pkl"
+        model_path = os.path.join("artifacts/best_logreg_model.pkl")
         joblib.dump(best_model, model_path)
 
         mlflow.log_artifact(model_path, artifact_path="model")
