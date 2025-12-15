@@ -11,7 +11,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 import mlflow
 import mlflow.sklearn
 
-if __name__ == "_main_":
+if __name__ == "__main__":
     with mlflow.start_run():
         df = pd.read_csv("Predictive_Maintenance_Preproces.csv")
 
@@ -68,16 +68,16 @@ if __name__ == "_main_":
                 best_y_pred = y_pred
                 best_params = params
 
-            mlflow.log_params(best_params)
-            mlflow.log_metric("best_f1_score", best_f1)
+        mlflow.log_params(best_params)
+        mlflow.log_metric("best_f1_score", best_f1)
     
-            cm = confusion_matrix(y_test, best_y_pred)
-            print("\nConfusion Matrix:")
-            print(cm)
+        cm = confusion_matrix(y_test, best_y_pred)
+        print("\nConfusion Matrix:")
+        print(cm)
             
-            mlflow.sklearn.log_model(
-                sk_model=best_model,
-                name="model"
-            )
+        mlflow.sklearn.log_model(
+            sk_model=best_model,
+            artifact_path="model"
+        )
 
     print("\n=== MLflow logging completed ===")
