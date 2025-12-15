@@ -68,11 +68,19 @@ jobs:
           echo "Listing MLProjects/mlruns/0/$RUN_ID/artifacts/"
           ls -R MLProjects/mlruns/0/$RUN_ID/artifacts/
 
-      - name: Upload MLflow artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: mlflow-model
-          path: MLProjects/mlruns
+      # - name: Upload MLflow artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: mlflow-model
+      #     path: MLProjects/mlruns
+
+      - name: Commit mlruns to repo
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add mlruns/
+          git diff --cached --quiet || git commit -m "Add MLflow run artifacts"
+          git push
     
       # - name: Commit and Push
       #   run: |
