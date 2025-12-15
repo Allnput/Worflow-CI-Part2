@@ -89,11 +89,16 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
       
-          git fetch origin
+          # 1. Tambahkan perubahan mlruns
+          git add -f MLProjects/mlruns/
+      
+          # 2. Commit (kalau ada perubahan)
+          git diff --cached --quiet || git commit -m "Add MLflow run artifacts"
+      
+          # 3. Sync dengan remote (rebase)
           git pull --rebase origin main
       
-          git add -f MLProjects/mlruns/
-          git diff --cached --quiet || git commit -m "Add MLflow run artifacts"
+          # 4. Push
           git push origin main
     
       # - name: Commit and Push
