@@ -83,7 +83,6 @@ jobs:
 
       - name: Verify model directory exists for RUN_ID
         run: |
-          conda activate Maintenance-Prediction
           echo "Verifying the model directory for RUN_ID: $RUN_ID"
           if [ ! -d "MLProjects/mlruns/0/$RUN_ID/artifacts/model" ]; then
             echo "Model not found for RUN_ID: $RUN_ID. Exiting."
