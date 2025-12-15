@@ -1,0 +1,14 @@
+artifact_uri: file:///home/runner/work/Worflow-CI-Part2/Worflow-CI-Part2/MLProjects/mlruns/0/77612b1525564e0cab83029f6a018ccf/artifacts
+end_time: 1765817353901
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 77612b1525564e0cab83029f6a018ccf
+run_name: casual-swan-536
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1765817349893
+status: 3
+tags: []
+user_id: runner
