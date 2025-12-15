@@ -1,0 +1,14 @@
+artifact_uri: file:///home/runner/work/Worflow-CI-Part2/Worflow-CI-Part2/MLProjects/mlruns/0/c4f6b958cbce4fae9bdb726ddc0c4ed7/artifacts
+end_time: 1765816273574
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: c4f6b958cbce4fae9bdb726ddc0c4ed7
+run_name: auspicious-jay-611
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1765816272224
+status: 3
+tags: []
+user_id: runner
