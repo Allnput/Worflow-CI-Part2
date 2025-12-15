@@ -81,6 +81,4 @@ if __name__ == "__main__":
             input_example=X_train.iloc[:5]
         )
 
-        mlflow.log_artifact(model_path, artifact_path="model")
-
     print("\n=== MLflow logging completed ===")
