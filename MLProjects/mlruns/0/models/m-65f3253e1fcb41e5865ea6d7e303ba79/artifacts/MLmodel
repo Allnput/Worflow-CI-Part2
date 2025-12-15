@@ -1,4 +1,4 @@
-artifact_path: file:///home/runner/work/Worflow-CI-Part2/Worflow-CI-Part2/MLProjects/mlruns/0/models/m-3846da2ac36447498d27cf0414c67289/artifacts
+artifact_path: file:///home/runner/work/Worflow-CI-Part2/Worflow-CI-Part2/MLProjects/mlruns/0/models/m-65f3253e1fcb41e5865ea6d7e303ba79/artifacts
 flavors:
   python_function:
     env:
@@ -14,9 +14,9 @@ flavors:
     serialization_format: cloudpickle
     sklearn_version: 1.7.2
 mlflow_version: 3.7.0
-model_id: m-3846da2ac36447498d27cf0414c67289
+model_id: m-65f3253e1fcb41e5865ea6d7e303ba79
 model_size_bytes: 974
-model_uuid: m-3846da2ac36447498d27cf0414c67289
+model_uuid: m-65f3253e1fcb41e5865ea6d7e303ba79
 prompts: null
-run_id: 13fac3ab733b40f1bb1068eef4af0bb1
-utc_time_created: '2025-12-15 11:08:22.150340'
+run_id: 441ded5bf6ea49218961aacde992d623
+utc_time_created: '2025-12-15 11:18:36.579168'
