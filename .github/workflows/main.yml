@@ -13,7 +13,7 @@ on:
 
 env:
   CSV_URL: "MLProjects/Predictive_Maintenance_Preproces.csv"
-  TARGET_VAR: "Maintenance_Prediction"
+  TARGET_VAR: "Maintenance-Prediction"
 
 jobs:
   train-and-deploy:
@@ -39,7 +39,7 @@ jobs:
           pip install mlflow pandas scikit-learn numpy
           
       - name: Set up Conda
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           environment-file: MLProjects/conda.yaml
           activate-environment: Maintenance-Prediction
@@ -100,7 +100,7 @@ jobs:
       # ===============================
       - name: Build Docker Image from MLflow model
         run: |
-          conda activate Maintenance_Prediction
+          conda activate Maintenance-Prediction
           mlflow models build-docker --model-uri "file://$GITHUB_WORKSPACE/MLProjects/mlruns/0/$RUN_ID/artifacts/model" --name cc
       
       # ===============================
