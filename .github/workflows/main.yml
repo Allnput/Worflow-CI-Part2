@@ -92,8 +92,9 @@ jobs:
 
       - name: Build Docker Image from MLflow model
         run: |
-            conda run -n Maintenance-Prediction
-            mlflow models build-docker --model-uri "file://$GITHUB_WORKSPACE/MLProjects/mlruns/0/$RUN_ID/artifacts/model" --name cc
+          source ~/.bashrc
+          conda activate Maintenance-Prediction
+          mlflow models build-docker --model-uri "file://$GITHUB_WORKSPACE/MLProjects/mlruns/0/$RUN_ID/artifacts/model" --name cc
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
