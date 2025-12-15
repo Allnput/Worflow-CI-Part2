@@ -22,22 +22,17 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
 
-      - name: Check Env
-        run: |
-          echo "CSV_URL=$CSV_URL"
-          echo "TARGET_VAR=$TARGET_VAR"
-          
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # Kita butuh library ini di environment runner agar bisa setup experiment
           pip install mlflow pandas scikit-learn numpy
-          
+
       - name: Set up Conda
         uses: conda-incubator/setup-miniconda@v3
         with:
@@ -45,37 +40,19 @@ jobs:
           activate-environment: Maintenance-Prediction
           auto-activate-base: false
 
-      - name: Initialize Conda
-        run: |
-          echo "Initializing Conda for bash"
-          conda init bash
-          source ~/.bashrc  # Apply the changes made by 'conda init'
-          
-      - name: Install MLflow and dependencies
-        run: |
-            source ~/.bashrc
-            conda activate Maintenance-Prediction
-            pip install mlflow  # Install mlflow if it wasn't installed in the environment
-            pip install -r MLProjects/requirements.txt  # Optional, if there is a requirements.txt
-
       - name: Clean old mlruns
         run: |
           rm -rf MLProjects/mlruns
 
       - name: Set MLflow tracking URI
         run: |
-            echo "MLFLOW_TRACKING_URI=file://$GITHUB_WORKSPACE/MLProjects/mlruns" >> $GITHUB_ENV
+          echo "MLFLOW_TRACKING_URI=file://$GITHUB_WORKSPACE/MLProjects/mlruns" >> $GITHUB_ENV
 
       - name: Run MLflow Project
         run: |
-            cd MLProjects
-            mlflow run . -P data_path=Predictive_Maintenance_Preproces.csv --env-manager=local
+          cd MLProjects
+          mlflow run . -P data_path=Predictive_Maintenance_Preproces.csv --env-manager=local
 
-      - name: List MLruns folder
-        run: |
-            echo "Listing MLProjects/mlruns/0/$RUN_ID/artifacts/"
-            ls -R MLProjects/mlruns/0/$RUN_ID/artifacts/
-    
       - name: Get latest MLflow run_id
         run: |
           RUN_ID=$(ls -td $GITHUB_WORKSPACE/MLProjects/mlruns/0/*/ 2>/dev/null | head -n 1 | awk -F/ '{print $(NF-1)}')
@@ -85,6 +62,11 @@ jobs:
           fi
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
           echo "Latest run_id: $RUN_ID"
+
+      - name: List MLruns folder (debug)
+        run: |
+          echo "Listing MLProjects/mlruns/0/$RUN_ID/artifacts/"
+          ls -R MLProjects/mlruns/0/$RUN_ID/artifacts/
 
       - name: Verify model directory exists for RUN_ID
         run: |
@@ -101,36 +83,21 @@ jobs:
           git add MLProjects/artifacts/best_logreg_model.pkl
           git commit -m "Save mlruns from CI run" || echo "No changes to commit"
           git push
-      
-      # ===============================
-      # Build Docker Image from MLflow Model
-      # ===============================
+
       - name: Build Docker Image from MLflow model
         run: |
-          conda activate Maintenance-Prediction
           mlflow models build-docker --model-uri "file://$GITHUB_WORKSPACE/MLProjects/mlruns/0/$RUN_ID/artifacts/model" --name cc
       
-      # ===============================
-      # Login Docker Hub
-      # ===============================
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      # ===============================
-      # Tag Docker Image
-      # ===============================
       - name: Tag Docker Image
         run: |
-          docker tag maintenance-model \
-            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}:latest
+          docker tag cc ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}:latest
 
-      # ===============================
-      # Push Docker Image
-      # ===============================
       - name: Push Docker Image
         run: |
-          docker push \
-            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}:latest
