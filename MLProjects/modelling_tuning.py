@@ -74,10 +74,12 @@ if __name__ == "__main__":
         cm = confusion_matrix(y_test, best_y_pred)
         print("\nConfusion Matrix:")
         print(cm)
-
-        os.makedirs("artifacts", exist_ok=True)
-        model_path = os.path.join("artifacts/best_logreg_model.pkl")
-        joblib.dump(best_model, model_path)
+        
+        mlflow.sklearn.log_model(
+            sk_model=best_model,
+            artifact_path="model",
+            input_example=X_train.iloc[:5]
+        )
 
         mlflow.log_artifact(model_path, artifact_path="model")
 
