@@ -77,19 +77,11 @@ def main(data_path):
         mlflow.log_metric("false_negative", fn)
         mlflow.log_metric("true_positive", tp)
 
-        # Pastikan folder artifacts/model dibuat
         mlflow.sklearn.log_model(
-            best_model,
-            artifact_path="model",  # <-- ini penting, buat folder model di artifacts
+            best_model, "model",
             input_example=X_test.iloc[:5]
         )
-
-    # Simpan juga secara lokal di artifacts/
-    os.makedirs("artifacts", exist_ok=True)
-    model_path = "artifacts/best_logreg_model.pkl"
-    joblib.dump(best_model, model_path)
-
-    # Print summary
+        
     print("Best Parameters:", best_params)
     print(f"Accuracy  : {acc}")
     print(f"Recall    : {recall}")
@@ -100,11 +92,6 @@ def main(data_path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--data_path",
-        type=str,
-        required=True,
-        help="Path ke file CSV dataset"
-    )
+    parser.add_argument("--data_path", type=str, required=True)
     args = parser.parse_args()
     main(args.data_path)
