@@ -82,11 +82,6 @@ jobs:
           git commit -m "Save mlruns from CI run" || echo "No changes to commit"
           git push
 
-
-      - name: Debug MLflow runs
-        run: |
-          mlflow runs list
-          
       - name: Build Docker Image from MLflow model
         run: |
           mlflow models build-docker \
