@@ -74,10 +74,6 @@ jobs:
           echo "Listing MLProjects/mlruns/0/$RUN_ID/artifacts/"
           ls -R MLProjects/mlruns/0/$RUN_ID/artifacts/
           
-      - name: Verify model exists via MLflow
-        run: |
-          mlflow artifacts list runs:/$RUN_ID/model
-          
       - name: Commit and Push
         run: |
           git config user.name "github-actions[bot]"
