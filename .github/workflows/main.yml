@@ -34,11 +34,17 @@ jobs:
           pip install mlflow pandas scikit-learn numpy
 
       - name: Set up Conda
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v2
         with:
           environment-file: MLProjects/conda.yaml
           activate-environment: Maintenance-Prediction
           auto-activate-base: false
+
+      - name: Initialize Conda
+        run: |
+          echo "Initializing Conda for bash"
+          conda init bash
+          source ~/.bashrc
 
       - name: Clean old mlruns
         run: |
@@ -47,7 +53,7 @@ jobs:
       - name: Set MLflow tracking URI
         run: |
           echo "MLFLOW_TRACKING_URI=file://$GITHUB_WORKSPACE/MLProjects/mlruns" >> $GITHUB_ENV
-
+          
       - name: Run MLflow Project
         run: |
           cd MLProjects
