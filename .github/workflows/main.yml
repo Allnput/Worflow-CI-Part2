@@ -59,9 +59,9 @@ jobs:
           cd MLProjects
           mlflow run . -P data_path=Predictive_Maintenance_Preproces.csv --env-manager=local
 
-      - name: Check model artifact
-        run: |
-          find MLProjects/mlruns -type d -path "*artifacts/model"
+      # - name: Check model artifact
+      #   run: |
+      #     find MLProjects/mlruns -type d -path "*artifacts/model"
 
       - name: Get latest MLflow run_id
         run: |
@@ -110,8 +110,16 @@ jobs:
         run: |
           source ~/.bashrc
           conda activate Maintenance-Prediction
-          mlflow models build-docker --model-uri "file://$GITHUB_WORKSPACE/MLProjects/mlruns/0/$RUN_ID/artifacts/model" --name maintenance-prediction
-
+      
+          cd MLProjects
+          MODEL_PATH=$(ls -d mlruns/0/models/* | tail -n 1)
+      
+          echo "Using model at: $MODEL_PATH"
+      
+          mlflow models build-docker \
+            -m "$MODEL_PATH" \
+            -n maintenance-prediction
+      
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
