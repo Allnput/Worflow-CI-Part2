@@ -12,6 +12,10 @@ import mlflow
 import mlflow.sklearn
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data_path", type=str, required=True)
+    args = parser.parse_args()
+
     with mlflow.start_run():
         df = pd.read_csv("Predictive_Maintenance_Preproces.csv")
 
