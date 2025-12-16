@@ -96,7 +96,7 @@ jobs:
         run: |
           rm -rf exported_model
           mkdir -p exported_model
-          cp -r MLProjects/mlruns/0/$RUN_ID/artifacts/models/model exported_model/
+          cp -r MLProjects/mlruns/0/$RUN_ID/artifacts/model exported_model/
     
       - name: Debug exported model
         run: |
