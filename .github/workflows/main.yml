@@ -12,10 +12,7 @@ on:
       - main
 
 env:
-  CSV_URL: "MLProjects/Predictive_Maintenance_Preproces.csv"
-  TARGET_VAR: "Maintenance-Prediction"
-  MODEL_NAME: "maintenance-model-predictor" # <--- PERBAIKAN: Didefinisikan di sini
-  DOCKER_REPO: ${{ secrets.DOCKER_HUB_REPO }} # Untuk mempermudah
+  MODEL_NAME: maintenance-prediction
 
 jobs:
   train-and-deploy:
@@ -25,7 +22,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 1. Set up Conda Environment
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install mlflow pandas scikit-learn numpy
+
       - name: Set up Conda
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -33,59 +39,58 @@ jobs:
           activate-environment: Maintenance-Prediction
           auto-activate-base: false
 
-      - name: Initialize Conda (Hanya init)
-        run: conda init bash 
+      - name: Initialize Conda
+        run: |
+          echo "Initializing Conda for bash"
+          conda init bash
+          source ~/.bashrc
 
       - name: Clean old mlruns
-        run: rm -rf MLProjects/mlruns
+        run: |
+          rm -rf MLProjects/mlruns
 
       - name: Set MLflow tracking URI
-        run: echo "MLFLOW_TRACKING_URI=file://$GITHUB_WORKSPACE/MLProjects/mlruns" >> $GITHUB_ENV
-        
-      # 2. Train model with MLflow (PERBAIKAN KRITIS: Ganti mlflow run)
-      - name: Train model with MLflow 
+        run: |
+          echo "MLFLOW_TRACKING_URI=file://$GITHUB_WORKSPACE/MLProjects/mlruns" >> $GITHUB_ENV
+          
+      - name: Train model with MLflow
         shell: bash
         run: |
-          source /usr/share/miniconda/etc/profile.d/conda.sh # Inisialisasi Conda
+          source ~/.bashrc
           conda activate Maintenance-Prediction
-          # Ganti 'mlflow run .' dengan menjalankan script Python secara langsung
-          python MLProjects/modelling_tuning.py \
-            --data_path MLProjects/Predictive_Maintenance_Preproces.csv
+          cd MLProjects
+          mlflow run . -P data_path=Predictive_Maintenance_Preproces.csv --env-manager=local
 
-      # 3. Get latest MLflow run_id
-      - name: Get latest MLflow run_id
+      # - name: Check model artifact
+      #   run: |
+      #     find MLProjects/mlruns -type d -path "*artifacts/model"
+
+      - name: Get latest MLflow RUN_ID
         shell: bash
         run: |
-          RUN_ID=$(ls -td $GITHUB_WORKSPACE/MLProjects/mlruns/0/*/ 2>/dev/null | head -n 1 | awk -F/ '{print $(NF-1)}')
+          RUN_ID=$(ls -td $GITHUB_WORKSPACE/MLProjects/mlruns/0/*/ | head -n 1 | awk -F/ '{print $(NF-1)}')
           if [ -z "$RUN_ID" ]; then
-            echo "No MLflow run found! Exiting."
-            exit 1
+            echo "No MLflow run found" && exit 1
           fi
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
-          echo "Latest run_id: $RUN_ID"
-
-      - name: Debug artifacts tree
-        run: ls -R MLProjects/mlruns/0/$RUN_ID/artifacts
+          echo "RUN_ID=$RUN_ID"
 
       - name: Verify model artifact exists
-        # Jalur kini seharusnya bekerja setelah perubahan langkah training
-        run: ls -R MLProjects/mlruns/0/$RUN_ID/artifacts/model
+        run: |
+          ls -R MLProjects/mlruns/0/$RUN_ID/artifacts/model
 
-      # 4. Build Docker Image from MLflow run (PERBAIKAN: Menggunakan env.MODEL_NAME)
+      # - name: Upload MLflow artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: mlflow-model
+      #     path: MLProjects/mlruns
+
       - name: Build Docker Image from MLflow run
         shell: bash
         run: |
-          source /usr/share/miniconda/etc/profile.d/conda.sh
+          source ~/.bashrc
           conda activate Maintenance-Prediction
-          mlflow models build-docker \
-            --model-uri "runs:/$RUN_ID/model" \
-            --name ${{ env.MODEL_NAME }} # Menggunakan variabel lingkungan yang benar
-          
-      - name: Export ML model artifact (model only)
-        run: |
-          rm -rf exported_model
-          mkdir -p exported_model
-          cp -r MLProjects/mlruns/0/$RUN_ID/artifacts/model exported_model/
+          mlflow models build-docker \--model-uri "runs:/$RUN_ID/model" \--name $MODEL_NAME
 
       - name: Commit exported ML model artifact to GitHub
         run: |
@@ -94,20 +99,17 @@ jobs:
           git add exported_model/
           git diff --cached --quiet || git commit -m "Add trained ML model artifact"
           git push origin main
-
+          
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      # 5. Tag Docker Image (PERBAIKAN: Menggunakan tag yang benar)
       - name: Tag Docker Image
         run: |
-          # Model Image yang dihasilkan oleh MLflow diberi tag dengan nama model/MODEL_NAME
-          docker tag ${{ env.MODEL_NAME }}:latest ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_REPO }}:latest 
+          docker tag cc ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}:latest
 
-      # 6. Push Docker Image
       - name: Push Docker Image
         run: |
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_REPO }}:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}:latest
