@@ -18,7 +18,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     with mlflow.start_run():
-        df = pd.read_csv("Predictive_Maintenance_Preproces.csv")
+        df = pd.read_csv(args.data_path)
 
         X = df.drop(columns=['Target', 'Failure Type'])
         y = df['Target']
@@ -81,8 +81,8 @@ if __name__ == "__main__":
         print(cm)
             
         mlflow.sklearn.log_model(
-            sk_model=best_model,
-            artifact_path="model"
+            best_model,
+            name="model"
         )
 
     print("\n=== MLflow logging completed ===")
