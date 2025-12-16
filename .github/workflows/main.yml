@@ -114,9 +114,14 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
+      
+          git fetch origin main
+          git pull --rebase origin main
+      
           git add exported_model/
           git diff --cached --quiet || git commit -m "Add trained ML model artifact"
           git push origin main
+
           
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
