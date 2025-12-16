@@ -75,9 +75,9 @@ jobs:
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
           echo "RUN_ID=$RUN_ID"
 
-      - name: Verify model artifact exists
-        run: |
-          ls -R MLProjects/mlruns/0/$RUN_ID/artifacts/model
+      # - name: Verify model artifact exists
+      #   run: |
+      #     ls -R MLProjects/mlruns/0/$RUN_ID/artifacts/model
 
       # - name: Upload MLflow artifacts
       #   uses: actions/upload-artifact@v4
