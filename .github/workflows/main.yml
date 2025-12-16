@@ -61,10 +61,6 @@ jobs:
           cd MLProjects
           mlflow run . -P data_path=Predictive_Maintenance_Preproces.csv --env-manager=local
 
-      # - name: Check model artifact
-      #   run: |
-      #     find MLProjects/mlruns -type d -path "*artifacts/model"
-
       - name: Get latest MLflow RUN_ID
         shell: bash
         run: |
