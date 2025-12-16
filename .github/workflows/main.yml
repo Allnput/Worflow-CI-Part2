@@ -56,10 +56,12 @@ jobs:
       - name: Train model with MLflow
         shell: bash
         run: |
-          source ~/.bashrc
+          # Hapus source ~/.bashrc dan gunakan jalur Conda absolut untuk keamanan
+          source /usr/share/miniconda/etc/profile.d/conda.sh 
           conda activate Maintenance-Prediction
-          cd MLProjects
-          mlflow run . -P data_path=Predictive_Maintenance_Preproces.csv --env-manager=local
+          # Ganti 'mlflow run .' dengan perintah Python langsung
+          python MLProjects/modelling_tuning.py \
+            --data_path MLProjects/Predictive_Maintenance_Preproces.csv
 
       # - name: Check model artifact
       #   run: |
@@ -74,6 +76,13 @@ jobs:
           fi
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
           echo "RUN_ID=$RUN_ID"
+
+      - name: Export ML model artifact (model only)
+        run: |
+          rm -rf exported_model
+          mkdir -p exported_model
+          # RUN_ID harus didefinisikan di GITHUB_ENV oleh langkah sebelumnya
+          cp -r MLProjects/mlruns/0/$RUN_ID/artifacts/model exported_model/
 
       # - name: Verify model artifact exists
       #   run: |
