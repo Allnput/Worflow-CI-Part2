@@ -91,12 +91,20 @@ jobs:
           source ~/.bashrc
           conda activate Maintenance-Prediction
           mlflow models build-docker \--model-uri "runs:/$RUN_ID/model" \--name $MODEL_NAME
-
-      - name: Export ML model artifact
+      
+      - name: Export ML model artifact (MLflow way)
+        shell: bash
         run: |
+          source ~/.bashrc
+          conda activate Maintenance-Prediction
+      
           rm -rf exported_model
           mkdir -p exported_model
-          cp -r MLProjects/mlruns/0/$RUN_ID/artifacts/model exported_model/
+      
+          mlflow artifacts download \
+            --run-id $RUN_ID \
+            --artifact-path model \
+            --dst-path exported_model
     
       - name: Debug exported model
         run: |
