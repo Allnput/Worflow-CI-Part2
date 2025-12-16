@@ -78,7 +78,7 @@ jobs:
 
       - name: Verify model artifact exists
         run: |
-          ls -R MLProjects/mlruns/0/$RUN_ID/artifacts/model
+          ls -R MLProjects/mlruns/0/$RUN_ID/artifacts/models/model
 
       - name: Build Docker Image from MLflow run
         shell: bash
