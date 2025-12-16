@@ -72,6 +72,10 @@ jobs:
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
           echo "Latest run_id: $RUN_ID"
 
+      - name: Debug artifacts tree
+        run: |
+          ls -R MLProjects/mlruns/0/$RUN_ID/artifacts
+
       - name: Verify model artifact exists
         run: |
           ls -R MLProjects/mlruns/0/$RUN_ID/artifacts/model
